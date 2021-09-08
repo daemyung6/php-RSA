@@ -13,16 +13,20 @@
         if(!isset($_POST["data"])) {
             returnError("잘못된 쿼리 입니다.");
         }
-
-        $inputStr = base64_decode($_POST["data"]);
-
         $privateKey = file_get_contents('../key/private.key');
-        $decrypted = null;
+
+        $json = json_decode($_POST["data"], true);
+        $decrypted_json_str = "";
         
-        openssl_private_decrypt($inputStr, $decrypted, $privateKey, OPENSSL_PKCS1_PADDING);
+        for ($i=0; $i < count($json); $i++) { 
+            $inputStr = base64_decode($json[$i]);
+            $decrypted = null;
+            openssl_private_decrypt($inputStr, $decrypted, $privateKey, OPENSSL_PKCS1_PADDING);
+            $decrypted_json_str .= $decrypted;
+        }
 
         $data["success"] = true;
-        $data["decrypted"] = $decrypted;
+        $data["decrypted"] = $decrypted_json_str;
         $json = json_encode($data, JSON_UNESCAPED_UNICODE);
         echo $json;
         die;
